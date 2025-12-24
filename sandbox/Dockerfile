@@ -1,4 +1,8 @@
 FROM python:3.11-slim
-WORKDIR /sandbox
-RUN useradd -m -u 1000 sandboxuser
+
+WORKDIR /workspace
+
+RUN useradd -m sandboxuser
 USER sandboxuser
+
+CMD ["python"]

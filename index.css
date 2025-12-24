@@ -1,0 +1,251 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.header .info {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: calc(100vh - 140px); /* header (≈100px) + padding (20px × 2) = 140px */
+}
+
+.editor-section,
+.output-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.editor-section {
+    flex: 1; /* Takes available space above output */
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.output-section {
+    flex: 0 0 40%; /* Fixed ~40% height for output (adjust as needed) */
+    /* Or use flex: 1 for equal split, or flex: 0 0 300px for fixed height */
+}
+
+.section-header {
+    background: #f5f5f5;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-header h2 {
+    font-size: 18px;
+    color: #333;
+}
+
+.controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-run {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-run:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-run:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-clear {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn-clear:hover {
+    background: #d0d0d0;
+}
+
+.editor-container {
+    flex: 1;
+    position: relative;
+}
+
+#editor {
+    width: 100%;
+    height: 100%;
+}
+
+.output-content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.status-bar {
+    background: #f5f5f5;
+    padding: 12px 24px;
+    border-top: 1px solid #e0e0e0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.status-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.status-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.status-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.status-pending {
+    color: #ff9800;
+}
+
+.status-running {
+    color: #667eea;
+}
+
+.status-completed {
+    color: #4caf50;
+}
+
+.status-failed {
+    color: #f44336;
+}
+
+.status-timeout {
+    color: #ff5722;
+}
+
+.output-line {
+    margin-bottom: 4px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.output-error {
+    color: #ff6b6b;
+}
+
+.output-success {
+    color: #51cf66;
+}
+
+.output-info {
+    color: #74c0fc;
+}
+
+.loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 3px solid rgba(102, 126, 234, 0.3);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.timeout-input {
+    padding: 8px 12px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100px;
+}
+
+.timeout-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #555;
+}
+
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+
+    .editor-section {
+        border-right: none;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .status-bar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
