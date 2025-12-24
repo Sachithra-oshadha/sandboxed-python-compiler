@@ -1,6 +1,10 @@
+import os
+import shutil
 import docker
 import time
 import uuid
+import tarfile
+import io
 from datetime import datetime
 from models import ExecutionStatus, ExecutionResult
 
@@ -13,6 +17,15 @@ class CodeExecutor:
     def _escape_code(self, code: str) -> str:
         """Safely escape code for python -c."""
         return code.replace("'", "'\"'\"'")
+
+    def _count_lines(self, path):
+        total = 0
+        for root, _, files in os.walk(path):
+            for f in files:
+                if f.endswith(".py"):
+                    with open(os.path.join(root, f)) as file:
+                        total += sum(1 for _ in file)
+        return total
 
     def execute(self, code: str, timeout: int = 10):
         execution_id = str(uuid.uuid4())
@@ -94,6 +107,72 @@ class CodeExecutor:
                     container.remove(force=True)
                 except Exception:
                     pass
+
+        return execution_id
+
+    
+
+    def execute_project(self, project_path: str, entry_file: str, timeout: int):
+        execution_id = str(uuid.uuid4())
+
+        self.executions[execution_id] = {
+            "status": ExecutionStatus.PENDING,
+            "start_time": datetime.now(),
+            "lines_of_code": self._count_lines(project_path),
+            "output": "",
+            "error": "",
+            "execution_time": None,
+        }
+
+        container = None
+
+        try:
+            self.executions[execution_id]["status"] = ExecutionStatus.RUNNING
+
+            # 1️⃣ Create container (do NOT start yet)
+            container = self.client.containers.create(
+                image="python-sandbox:latest",
+                command=["python", entry_file],
+                working_dir="/workspace",
+                mem_limit="100m",
+                network_disabled=True,
+                detach=True
+            )
+
+            # 2️⃣ Tar project directory
+            tar_stream = io.BytesIO()
+            with tarfile.open(fileobj=tar_stream, mode="w") as tar:
+                tar.add(project_path, arcname=".")
+
+            tar_stream.seek(0)
+
+            # 3️⃣ Copy files into container
+            container.put_archive("/workspace", tar_stream)
+
+            # 4️⃣ Start container
+            start = time.time()
+            container.start()
+            container.wait(timeout=timeout)
+            exec_time = time.time() - start
+
+            logs = container.logs(stdout=True, stderr=True).decode()
+
+            self.executions[execution_id].update({
+                "status": ExecutionStatus.COMPLETED,
+                "output": logs,
+                "execution_time": exec_time
+            })
+
+        except Exception as e:
+            self.executions[execution_id].update({
+                "status": ExecutionStatus.FAILED,
+                "error": str(e)
+            })
+
+        finally:
+            if container:
+                container.remove(force=True)
+            shutil.rmtree(project_path, ignore_errors=True)
 
         return execution_id
 
